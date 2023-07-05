@@ -137,6 +137,11 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+#Images of contacts
+images/
+
+contacts_app.db
+
 # PyCharm
 #  JetBrains specific template is maintainted in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/master/Global/JetBrains.gitignore
