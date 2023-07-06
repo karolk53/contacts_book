@@ -6,12 +6,21 @@ class ContactBase(BaseModel):
     first_name: str = Field(regex="")
     last_name: str = Field(regex="")
     email: EmailStr
-    phone_number: str = Field(regex="^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$")
+    phone_number: str = Field(regex="^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{3}$")
     image: Optional[str]
 
 
 class ContactCreate(ContactBase):
-    pass
+    class Config:
+        schema_extra = {
+            "example":  {
+                    "first_name": "Julia",
+                    "last_name": "Nowak",
+                    "email": "julianowak@example.com",
+                    "phone_number": "786-307-361",
+                    "image": "string"
+            }
+        }
 
 
 class Contact(ContactBase):

@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from schemas import *
 from sqlalchemy.orm import Session
 from models import User as UserModel
-
+import os
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -25,15 +25,26 @@ def verify_password_hash(password_hash: str, plain_password: str):
 
 
 def get_user(db: Session, username: str):
-    return db.query(UserModel).filter(UserModel.username == username)
+    return db.query(UserModel).filter(UserModel.username == username).first()
 
 
-def authenticate_user(db: Session,username: str, password: str):
+def authenticate_user(db: Session, username: str, password: str):
     user = get_user(db=db, username=username)
     if not user:
         return False
     if not verify_password_hash(password_hash=user.password, plain_password=password):
         return False
     return user
+
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 
