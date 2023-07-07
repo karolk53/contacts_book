@@ -139,7 +139,9 @@ cython_debug/
 
 #Images of contacts
 images/*
+!images/.gitkeep
 
+#DATABASE
 contacts_app.db
 
 # PyCharm

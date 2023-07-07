@@ -16,6 +16,7 @@ contacts_router = APIRouter(
 
 IMAGEDIR = "images/"
 
+
 @contacts_router.post('/', status_code=status.HTTP_201_CREATED)
 async def add_new_contact(token: Annotated[str, Depends(oauth2_scheme)], contact: ContactCreate, user: Annotated[UserModel, Depends(get_current_user)], db: Session = Depends(get_db)):
 
@@ -61,7 +62,15 @@ async def get_user_single_contact(contact_id: int, token: Annotated[str, Depends
     contacts = user.contacts
     for c in contacts:
         if c.id == contact_id:
-            return jsonable_encoder(c)
+            return jsonable_encoder(
+                {
+                    "id": c.id,
+                    "first_name": c.first_name,
+                    "last_name": c.last_name,
+                    "email": c.email,
+                    "phone_number": c.phone_number
+                }
+            )
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -93,7 +102,15 @@ async def update_contact(contact_id: int, contact: ContactCreate, token: Annotat
 
     db.commit()
 
-    return jsonable_encoder(contact_to_update)
+    return jsonable_encoder(
+        {
+            "id": contact_to_update.id,
+            "first_name": contact_to_update.first_name,
+            "last_name": contact_to_update.last_name,
+            "email": contact_to_update.email,
+            "phone_number": contact_to_update.phone_number
+        }
+    )
 
 
 @contacts_router.delete("/delete/{contact_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -119,6 +136,12 @@ async def delete_contact_by_id(contact_id: int, token: Annotated[str, Depends(oa
 
 @contacts_router.patch("/image/upload/{contact_id}")
 async def upload_image_to_contact(contact_id: int, token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db), file: UploadFile = File(...)):
+
+    """
+        ## Upload image to contact
+        Endpoint that allows user to update a image to current contact.
+    """
+
     contact = db.query(Contact).filter(Contact.id == contact_id).first()
 
     if contact is None:
@@ -138,8 +161,13 @@ async def upload_image_to_contact(contact_id: int, token: Annotated[str, Depends
     return {"filename": file.filename}
 
 
-@contacts_router.get("/show/{contact_id}")
+@contacts_router.get("/image/show/{contact_id}")
 async def show_contact_image(contact_id: int, token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
+    """
+        ## Get contact's image
+        Endpoint that returns a contact's image.
+    """
+
     contact = db.query(Contact).filter(Contact.id == contact_id).first()
 
     if contact is None:

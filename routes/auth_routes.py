@@ -74,7 +74,7 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
 
-    return jsonable_encoder(new_user)
+    return jsonable_encoder(user)
 
 
 @auth_router.post("/token")
