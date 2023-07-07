@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import Response
+from fastapi.params import File
+from fastapi.responses import Response, FileResponse
 from authenticate import *
 from database import SessionLocal
 from routes.auth_routes import oauth2_scheme, get_current_user, get_db
@@ -13,6 +14,7 @@ contacts_router = APIRouter(
     tags=["CONTACTS"]
 )
 
+IMAGEDIR = "images/"
 
 @contacts_router.post('/', status_code=status.HTTP_201_CREATED)
 async def add_new_contact(token: Annotated[str, Depends(oauth2_scheme)], contact: ContactCreate, user: Annotated[UserModel, Depends(get_current_user)], db: Session = Depends(get_db)):
@@ -113,3 +115,39 @@ async def delete_contact_by_id(contact_id: int, token: Annotated[str, Depends(oa
     db.commit()
 
     return jsonable_encoder({"message": "Contact successfully deleted"})
+
+
+@contacts_router.patch("/image/upload/{contact_id}")
+async def upload_image_to_contact(contact_id: int, token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db), file: UploadFile = File(...)):
+    contact = db.query(Contact).filter(Contact.id == contact_id).first()
+
+    if contact is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cant find the contact"
+        )
+
+    contents = await file.read()
+
+    with open(f'{IMAGEDIR}{file.filename}', "wb") as f:
+        f.write(contents)
+
+    contact.image = f'{IMAGEDIR}{file.filename}'
+    db.commit()
+
+    return {"filename": file.filename}
+
+
+@contacts_router.get("/show/{contact_id}")
+async def show_contact_image(contact_id: int, token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
+    contact = db.query(Contact).filter(Contact.id == contact_id).first()
+
+    if contact is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cant find the contact"
+        )
+
+    path = contact.image
+
+    return FileResponse(path)

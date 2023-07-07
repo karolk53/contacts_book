@@ -138,7 +138,7 @@ dmypy.json
 cython_debug/
 
 #Images of contacts
-images/
+images/*
 
 contacts_app.db
 

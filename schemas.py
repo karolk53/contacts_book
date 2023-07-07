@@ -3,8 +3,8 @@ from typing import Optional
 
 
 class ContactBase(BaseModel):
-    first_name: str = Field(regex="")
-    last_name: str = Field(regex="")
+    first_name: str = Field(regex="^[a-zA-Z]{2,50}")
+    last_name: str = Field(regex="^[a-zA-Z]{2,50}")
     email: EmailStr
     phone_number: str = Field(regex="^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{3}$")
     image: Optional[str]
@@ -39,6 +39,16 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str = Field(min_length=6)
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "username": "johnsmith",
+                "email": "johnsmith@example.com",
+                "is_staff": True,
+                "password": "password"
+            }
+        }
 
 
 class User(UserBase):

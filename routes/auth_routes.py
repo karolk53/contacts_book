@@ -106,3 +106,16 @@ async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]
     """
 
     return jsonable_encoder(current_user)
+
+
+@auth_router.get("/users/all")
+async def get_all_users(current_user: Annotated[User, Depends(get_current_user)], db: Session = Depends(get_db)):
+    """
+        ## Users list
+        Endpoint that allows to get list of all users but only for staff users.
+     """
+
+    if current_user.is_staff:
+        return jsonable_encoder(db.query(UserModel).all())
+
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You dont have permissions!")

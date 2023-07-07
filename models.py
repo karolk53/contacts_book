@@ -25,7 +25,7 @@ class Contact(Base):
     last_name = Column(String)
     email = Column(String, unique=True)
     phone_number = Column(String)
-    image = Column(String, nullable=True)
+    image = Column(String, nullable=True)  #IT IS ADDED BUT FOR NOW UNSUPPORTED
     user_id = Column(Integer, ForeignKey("users.id"))
 
     user = relationship("User", back_populates="contacts")
